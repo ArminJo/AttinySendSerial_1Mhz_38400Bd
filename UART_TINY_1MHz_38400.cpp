@@ -18,9 +18,9 @@
 
 #include  "UART_TINY_1MHz_38400.h"
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <stdlib.h>
+#include <avr/io.h>         // for PORTB - is also included by <avr/interrupt.h>
+#include <avr/interrupt.h>  // for cli() and sei()
+#include <stdlib.h>         // for utoa() etc.
 
 #ifndef _NOP
 #define _NOP()  __asm__ volatile ("nop")
