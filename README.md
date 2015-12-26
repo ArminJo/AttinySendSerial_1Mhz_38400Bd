@@ -1,7 +1,7 @@
 # AttinySendSerial_1Mhz_38400Bd
 Minimal bit-bang send serial 38400 baud for 1 Mhz Attiny clock
 ### Perfect for debugging purposes
-#### Testet on an Attiny85
+#### Tested on an Attiny85
 #### Code size only 60 bytes
 ```
 Compile with:
