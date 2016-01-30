@@ -26,6 +26,10 @@
 #define _NOP()  __asm__ volatile ("nop")
 #endif
 
+#ifndef PORTB
+#define PORTB (*(volatile uint8_t *)((0x18) + 0x20))
+#endif
+
 /*
  * Only multiple of 4 cycles are possible. Last loop is only 3 cycles.
  * 3 -> 11 cycles
