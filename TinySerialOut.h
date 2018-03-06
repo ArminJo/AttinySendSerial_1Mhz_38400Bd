@@ -1,0 +1,42 @@
+#ifndef TINY_SERIAL_OUT_H_
+#define TINY_SERIAL_OUT_H_
+
+#include <stdint.h>
+#include <avr/interrupt.h>  // for cli() and sei()
+#include <avr/io.h>
+/*
+ * Change this, if you need another pin as serial output
+ */
+#define TX_PIN     1 // use one of PB0 to PB4 (+PB5) here
+
+extern bool sUseCliSeiForStrings;
+void useCliSeiForStrings(bool aUseCliSeiForStrings);
+
+inline void initTXPin() {
+    // TX_PIN is active LOW, so set it to HIGH initially
+    PORTB |= (1 << TX_PIN);
+    // set pin direction to output
+    DDRB |= (1 << TX_PIN);
+}
+
+void write1Start8Data1StopNoParity(uint8_t aChar);
+inline void write1Start8Data1StopNoParityWithCliSei(uint8_t aChar) {
+    cli();
+    write1Start8Data1StopNoParity(aChar);
+    sei();
+}
+
+void writeString(const char * aStringPtr);
+void writeStringWithCliSei(const char * aStringPtr);
+void writeStringWithoutCliSei(const char * aStringPtr);
+void writeStringSkipLeadingSpaces(const char * aStringPtr);
+
+void writeByte(int8_t aByte);
+void writeUnsignedByte(uint8_t aByte);
+void writeUnsignedByteHex(uint8_t aByte);
+void writeInt(int aInteger);
+void writeUnsignedInt(unsigned int aInteger);
+void writeLong(long aLong);
+void writeFloat(double aFloat);
+
+#endif /* TINY_SERIAL_OUT_H_ */
