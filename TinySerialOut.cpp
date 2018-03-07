@@ -1,10 +1,24 @@
 /*
  * TinySerialOut.cpp
  *
- *  Created on: 28.11.2015
- *  Author: Armin Joachimsmeyer
+ *  Copyright (C) 2015  Armin Joachimsmeyer
  *  Email: armin.joachimsmeyer@gmail.com
- *  License: GPL v3 (http://www.gnu.org/licenses/gpl.html)
+ *
+ *  This file is part of TinySerialOut https://github.com/ArminJo/AttinySendSerial_1Mhz_38400Bd.
+ *
+ *  TinySerialOut is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *
  *
  * For transmitting debug data over bit bang serial with 38400 baud for a TINY running on 1 MHz
  * 1 Start, 8 Data, 1 Stop, No Parity
@@ -13,9 +27,8 @@
  * For transmitting debug data over bit bang serial with 230400 baud for a TINY running on 8 MHz
  * 34.722 cycles per bit => 350 cycles per byte needed for 230400 baud
  *
- * Compile with
- * avr-g++ -I"\arduino\hardware\arduino\avr\cores\arduino" -I"E:\arduino\hardware\arduino\avr\variants\standard" -Wall -g3 -gstabs -Os -ffunction-sections -fdata-sections -fno-exceptions -mmcu=attiny85 -DF_CPU=1000000UL -MMD -MP -MF"src/UART_TINY_1MHz_38400.d" -MT"src/UART_TINY_1MHz_38400.d" -c -o "src/UART_TINY_1MHz_38400.o"  -x c++ "../src/UART_TINY_1MHz_38400.cpp"
- * to reproduce timing (or just use standard arduino settings :-))
+ * In order to guarantee the correct timing, compile with Arduino standard settings or:
+ * avr-g++ -I"C:\arduino\hardware\arduino\avr\cores\arduino" -I"C:\arduino\hardware\arduino\avr\variants\standard" -c -g -w -Os -ffunction-sections -fdata-sections -mmcu=attiny85 -DF_CPU=1000000UL -MMD -o "TinySerialOut.o" "TinySerialOut.cpp"
  *
  */
 
