@@ -1,3 +1,12 @@
+/*
+ * TinySerialOut.h
+ *
+ *  Copyright (C) 2015  Armin Joachimsmeyer
+ *  Email: armin.joachimsmeyer@gmail.com
+ *  License: GPL v3 (http://www.gnu.org/licenses/gpl.html)
+ *
+ */
+
 #ifndef TINY_SERIAL_OUT_H_
 #define TINY_SERIAL_OUT_H_
 
