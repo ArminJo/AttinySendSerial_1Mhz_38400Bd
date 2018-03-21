@@ -18,6 +18,8 @@
  */
 #define TX_PIN     1 // use one of PB0 to PB4 (+PB5) here
 
+#define USE115200BAUD // outcomment this to use bigger (120 bytes for unrolled loop) but faster code
+
 extern bool sUseCliSeiForStrings;
 void useCliSeiForStrings(bool aUseCliSeiForStrings);
 
