@@ -29,7 +29,8 @@
  *
  * In order to guarantee the correct timing, compile with Arduino standard settings or:
  * avr-g++ -I"C:\arduino\hardware\arduino\avr\cores\arduino" -I"C:\arduino\hardware\arduino\avr\variants\standard" -c -g -w -Os -ffunction-sections -fdata-sections -mmcu=attiny85 -DF_CPU=1000000UL -MMD -o "TinySerialOut.o" "TinySerialOut.cpp"
- *
+ * Tested with Arduino 1.6.8 and 1.8.5/gcc4.9.2
+ * !!!! It does not work with AVR gcc7.3.0 !!! since optimization is too bad
  */
 
 #include "TinySerialOut.h"
@@ -69,9 +70,166 @@ inline void delay4CyclesInlineExact(uint16_t a4Microseconds) {
 }
 
 #if (F_CPU == 1000000)
+#ifdef USE115200BAUD
+/*
+ *  Assembler code for 115200 baud extracted from Digispark core files:
+ *  Code size is 196 Byte (including first call)
+ *
+ *   TinyDebugSerial.h - Tiny write-only software serial.
+ *   Copyright 2010 Rowdy Dog Software. This code is part of Arduino-Tiny.
+ *
+ *   Arduino-Tiny is free software: you can redistribute it and/or modify it
+ *   under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or (at your
+ *   option) any later version.
+ */
+void write1Start8Data1StopNoParity(uint8_t value) {
+    asm volatile
+    (
+            "cli" "\n\t"
+
+            "cbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- 0 */
+            "ror   %[value]" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+
+            "brcs  L%=b0h" "\n\t" /* 1  (not taken) */
+            "nop" "\n\t" /* 1 */
+            "cbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- st is 9 cycles */
+            "rjmp  L%=b0z" "\n\t" /* 2 */
+            "L%=b0h: " /* 2  (taken) */
+            "sbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- st is 9 cycles */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "L%=b0z: "
+            "ror   %[value]" "\n\t" /* 1 */
+
+            "nop" "\n\t" /* 1 */
+
+            "brcs  L%=b1h" "\n\t" /* 1  (not taken) */
+            "nop" "\n\t" /* 1 */
+            "cbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b0 is 8 cycles */
+            "rjmp  L%=b1z" "\n\t" /* 2 */
+            "L%=b1h: " /* 2  (taken) */
+            "sbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b0 is 8 cycles */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "L%=b1z: "
+            "ror   %[value]" "\n\t" /* 1 */
+
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+
+            "brcs  L%=b2h" "\n\t" /* 1  (not taken) */
+            "nop" "\n\t" /* 1 */
+            "cbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b1 is 9 cycles */
+            "rjmp  L%=b2z" "\n\t" /* 2 */
+            "L%=b2h: " /* 2  (taken) */
+            "sbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b1 is 9 cycles */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "L%=b2z: "
+            "ror   %[value]" "\n\t" /* 1 */
+
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+
+            "brcs  L%=b3h" "\n\t" /* 1  (not taken) */
+            "nop" "\n\t" /* 1 */
+            "cbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b2 is 9 cycles */
+            "rjmp  L%=b3z" "\n\t" /* 2 */
+            "L%=b3h: " /* 2  (taken) */
+            "sbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b2 is 9 cycles */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "L%=b3z: "
+            "ror   %[value]" "\n\t" /* 1 */
+
+            "nop" "\n\t" /* 1 */
+
+            "brcs  L%=b4h" "\n\t" /* 1  (not taken) */
+            "nop" "\n\t" /* 1 */
+            "cbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b3 is 8 cycles */
+            "rjmp  L%=b4z" "\n\t" /* 2 */
+            "L%=b4h: " /* 2  (taken) */
+            "sbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b3 is 8 cycles */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "L%=b4z: "
+            "ror   %[value]" "\n\t" /* 1 */
+
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+
+            "brcs  L%=b5h" "\n\t" /* 1  (not taken) */
+            "nop" "\n\t" /* 1 */
+            "cbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b4 is 9 cycles */
+            "rjmp  L%=b5z" "\n\t" /* 2 */
+            "L%=b5h: " /* 2  (taken) */
+            "sbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b4 is 9 cycles */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "L%=b5z: "
+            "ror   %[value]" "\n\t" /* 1 */
+
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+
+            "brcs  L%=b6h" "\n\t" /* 1  (not taken) */
+            "nop" "\n\t" /* 1 */
+            "cbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b5 is 9 cycles */
+            "rjmp  L%=b6z" "\n\t" /* 2 */
+            "L%=b6h: " /* 2  (taken) */
+            "sbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b5 is 9 cycles */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "L%=b6z: "
+            "ror   %[value]" "\n\t" /* 1 */
+
+            "nop" "\n\t" /* 1 */
+
+            "brcs  L%=b7h" "\n\t" /* 1  (not taken) */
+            "nop" "\n\t" /* 1 */
+            "cbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b6 is 8 cycles */
+            "rjmp  L%=b7z" "\n\t" /* 2 */
+            "L%=b7h: " /* 2  (taken) */
+            "sbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b6 is 8 cycles */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "L%=b7z: "
+            "nop" "\n\t" /* 1 */
+
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "sbi   %[serreg], %[serbit]" "\n\t" /* 2  <--- b7 is 9 cycles */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            "nop" "\n\t" /* 1 */
+            /*    <---sp is 9 cycles */
+
+            "sei" "\n\t"
+
+            :
+            :
+            [value] "r" ( value ),
+            [serreg] "I" ( 0x18 ), /* 0x18 is PORTB on Attiny 85 */
+            [serbit] "I" ( TX_PIN )
+    );
+}
+#else
 /*
  * 26 cycles per bit, 260 per byte for 38400 baud
  * 24 cycles between each cbi (Clear Bit in Io-register) or sbi command
+ * code size is 76 Byte (including first call)
  */
 void write1Start8Data1StopNoParity(uint8_t aChar) {
     // start bit
@@ -101,7 +259,7 @@ void write1Start8Data1StopNoParity(uint8_t aChar) {
         _NOP();
         delay4CyclesInlineExact(3);
         --i;
-    } while (i > 0);
+    }while (i > 0);
 
     // to compensate for missing loop cycles at last bit
     _NOP();
@@ -112,8 +270,9 @@ void write1Start8Data1StopNoParity(uint8_t aChar) {
     // Stop bit
     PORTB |= 1 << TX_PIN;
     // -8 cycles to compensate for fastest repeated call (1 ret + 1 load + 1 call)
-    delay4CyclesInlineExact(4);            // gives minimum 25 cycles for stop bit :-)
+    delay4CyclesInlineExact(4);// gives minimum 25 cycles for stop bit :-)
 }
+#endif
 #endif
 
 #if (F_CPU == 8000000)
@@ -159,6 +318,9 @@ void write1Start8Data1StopNoParity(uint8_t aChar) {
     // -8 cycles to compensate for fastest repeated call (1 ret + 1 load + 1 call)
     delay4CyclesInlineExact(6);// gives minimum 33 cycles for stop bit :-)
 }
+#endif
+
+#if (F_CPU == 1000000)
 #endif
 
 void writeString(const char * aStringPtr) {
@@ -255,7 +417,7 @@ void writeFloat(double aFloat) {
  * Generated Assembler for write1Start8Data1StopNoParity() - 1MHz version.
  * Check with .lss file created with: avr-objdump -h -S MyProgram.elf  >"MyProgram.lss".
  *
- c4 98           cbi 0x18, 4
+ c4 98           cbi 0x18, 1
  1 00 00           nop
  2 eb e0           ldi r30, 0x04
  3 f0 e0           ldi r31, 0x00
@@ -271,10 +433,10 @@ void writeFloat(double aFloat) {
  2+3 02 c0           rjmp    .+6
  PORTB |= 1 << TX_PIN;
  3 00 00           nop
- 4+5 c4 9a           sbi 0x18, 4
+ 4+5 c4 9a           sbi 0x18, 1
  6+7 02 c0           rjmp    .+6
  PORTB &= ~(1 << TX_PIN);
- 4+5 c4 98           cbi 0x18, 4
+ 4+5 c4 98           cbi 0x18, 1
  6 00 00           nop
  7 00 00           nop
 
@@ -295,7 +457,7 @@ void writeFloat(double aFloat) {
  00 00           nop
 
  Stop bit
- c4 9a           sbi 0x18, 4
+ c4 9a           sbi 0x18, 1
  8a e0           ldi r24, 0x04
  90 e0           ldi r25, 0x00
  01 97           sbiw    r24, 0x01
