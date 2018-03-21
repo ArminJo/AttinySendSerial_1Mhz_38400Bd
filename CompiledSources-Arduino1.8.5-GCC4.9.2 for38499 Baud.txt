@@ -1,0 +1,93 @@
+000000c6 <_Z29write1Start8Data1StopNoParityh>:
+ * 26 cycles per bit, 260 per byte for 38400 baud
+ * 24 cycles between each cbi (Clear Bit in Io-register) or sbi command
+ */
+void write1Start8Data1StopNoParity(uint8_t aChar) {
+    // start bit
+    PORTB &= ~(1 << TX_PIN);
+  c6:	c1 98       	cbi	0x18, 1	; 24
+    _NOP();
+  c8:	00 00       	nop
+inline void delay4CyclesInlineExact(uint16_t a4Microseconds) {
+    // the following loop takes 4 cycles (4 microseconds  at 1MHz) per iteration
+    __asm__ __volatile__ (
+            "1: sbiw %0,1" "\n\t"    // 2 cycles
+            "brne .-4" : "=w" (a4Microseconds) : "0" (a4Microseconds)// 2 cycles
+    );
+  ca:	e4 e0       	ldi	r30, 0x04	; 4
+  cc:	f0 e0       	ldi	r31, 0x00	; 0
+  ce:	31 97       	sbiw	r30, 0x01	; 1
+  d0:	f1 f7       	brne	.-4      	; 0xce <_Z29write1Start8Data1StopNoParityh+0x8>
+  d2:	98 e0       	ldi	r25, 0x08	; 8
+  d4:	23 e0       	ldi	r18, 0x03	; 3
+  d6:	30 e0       	ldi	r19, 0x00	; 0
+    delay4CyclesInlineExact(4);
+
+    // 8 data bits
+    uint8_t i = 8;
+    do {
+        if (aChar & 0x01) {
+  d8:	80 ff       	sbrs	r24, 0
+  da:	03 c0       	rjmp	.+6      	; 0xe2 <_Z29write1Start8Data1StopNoParityh+0x1c>
+            // bit=1
+            // to compensate for jump at data=0
+            _NOP();
+  dc:	00 00       	nop
+            PORTB |= 1 << TX_PIN;
+  de:	c1 9a       	sbi	0x18, 1	; 24
+  e0:	03 c0       	rjmp	.+6      	; 0xe8 <_Z29write1Start8Data1StopNoParityh+0x22>
+        } else {
+            // bit=0
+            PORTB &= ~(1 << TX_PIN);
+  e2:	c1 98       	cbi	0x18, 1	; 24
+            // compensate for different cycles of sbrs
+            _NOP();
+  e4:	00 00       	nop
+            _NOP();
+  e6:	00 00       	nop
+        }
+        aChar = aChar >> 1;
+  e8:	86 95       	lsr	r24
+        // 3 cycles padding
+        _NOP();
+  ea:	00 00       	nop
+        _NOP();
+  ec:	00 00       	nop
+        _NOP();
+  ee:	00 00       	nop
+inline void delay4CyclesInlineExact(uint16_t a4Microseconds) {
+    // the following loop takes 4 cycles (4 microseconds  at 1MHz) per iteration
+    __asm__ __volatile__ (
+            "1: sbiw %0,1" "\n\t"    // 2 cycles
+            "brne .-4" : "=w" (a4Microseconds) : "0" (a4Microseconds)// 2 cycles
+    );
+  f0:	f9 01       	movw	r30, r18
+  f2:	31 97       	sbiw	r30, 0x01	; 1
+  f4:	f1 f7       	brne	.-4      	; 0xf2 <_Z29write1Start8Data1StopNoParityh+0x2c>
+  f6:	91 50       	subi	r25, 0x01	; 1
+    _NOP();
+    delay4CyclesInlineExact(4);
+
+    // 8 data bits
+    uint8_t i = 8;
+    do {
+  f8:	79 f7       	brne	.-34     	; 0xd8 <_Z29write1Start8Data1StopNoParityh+0x12>
+	...
+    _NOP();
+    _NOP();
+    _NOP();
+
+    // Stop bit
+    PORTB |= 1 << TX_PIN;
+ 102:	c1 9a       	sbi	0x18, 1	; 24
+inline void delay4CyclesInlineExact(uint16_t a4Microseconds) {
+    // the following loop takes 4 cycles (4 microseconds  at 1MHz) per iteration
+    __asm__ __volatile__ (
+            "1: sbiw %0,1" "\n\t"    // 2 cycles
+            "brne .-4" : "=w" (a4Microseconds) : "0" (a4Microseconds)// 2 cycles
+    );
+ 104:	84 e0       	ldi	r24, 0x04	; 4
+ 106:	90 e0       	ldi	r25, 0x00	; 0
+ 108:	01 97       	sbiw	r24, 0x01	; 1
+ 10a:	f1 f7       	brne	.-4      	; 0x108 <_Z29write1Start8Data1StopNoParityh+0x42>
+ 10c:	08 95       	ret
