@@ -13,10 +13,14 @@
 #include <stdint.h>
 #include <avr/interrupt.h>  // for cli() and sei()
 #include <avr/io.h>
+
 /*
  * Change this, if you need another pin as serial output
+ * or set it as Symbol
  */
-#define TX_PIN     1 // use one of PB0 to PB4 (+PB5) here
+#ifndef TX_PIN
+#define TX_PIN     PB1 // use one of PB0 to PB4 (+PB5) here
+#endif
 
 #define USE115200BAUD // outcomment this to use bigger (120 bytes for unrolled loop) but faster code
 
