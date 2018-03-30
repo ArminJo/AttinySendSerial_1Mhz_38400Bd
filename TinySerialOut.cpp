@@ -1,6 +1,17 @@
 /*
  * TinySerialOut.cpp
  *
+ * For transmitting debug data over bit bang serial with 38400 baud for a TINY running on 1 MHz
+ * 1 Start, 8 Data, 1 Stop, No Parity
+ * 26 cycles per bit => 260 cycles per byte needed for 38400 baud
+ *
+ * For transmitting debug data over bit bang serial with 115200 baud for a TINY running on 1 MHz
+ * 1 Start, 8 Data, 1 Stop, No Parity
+ * 9 cycles per bit => 90 cycles per byte needed for 115200 baud
+ *
+ * For transmitting debug data over bit bang serial with 230400 baud for a TINY running on 8 MHz
+ * 34.722 cycles per bit => 350 cycles per byte needed for 230400 baud
+ *
  *  Copyright (C) 2015  Armin Joachimsmeyer
  *  Email: armin.joachimsmeyer@gmail.com
  *
@@ -20,13 +31,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
  *
  *
- * For transmitting debug data over bit bang serial with 38400 baud for a TINY running on 1 MHz
- * 1 Start, 8 Data, 1 Stop, No Parity
- * 26 cycles per bit => 260 cycles per byte needed for 38400 baud
- *
- * For transmitting debug data over bit bang serial with 230400 baud for a TINY running on 8 MHz
- * 34.722 cycles per bit => 350 cycles per byte needed for 230400 baud
- *
  * In order to guarantee the correct timing, compile with Arduino standard settings or:
  * avr-g++ -I"C:\arduino\hardware\arduino\avr\cores\arduino" -I"C:\arduino\hardware\arduino\avr\variants\standard" -c -g -w -Os -ffunction-sections -fdata-sections -mmcu=attiny85 -DF_CPU=1000000UL -MMD -o "TinySerialOut.o" "TinySerialOut.cpp"
  * Tested with Arduino 1.6.8 and 1.8.5/gcc4.9.2
@@ -36,6 +40,8 @@
 #include "TinySerialOut.h"
 
 #include <avr/io.h>         // for PORTB - is also included by <avr/interrupt.h>
+#include <avr/pgmspace.h>   // for pgm_read_byte_near()
+#include <avr/eeprom.h>     // for eeprom_read_byte()
 #include <stdlib.h>         // for utoa() etc.
 
 #ifndef _NOP
@@ -334,6 +340,36 @@ void writeString(const char * aStringPtr) {
         while (*aStringPtr != 0) {
             write1Start8Data1StopNoParity(*aStringPtr++);
         }
+    }
+}
+
+void writeString_P(const char * aStringPtr) {
+    uint8_t tChar = pgm_read_byte_near((const uint8_t * ) aStringPtr);
+    // Comparing with 0xFF is safety net for wrong string pointer
+    while (tChar != 0 && tChar != 0xFF) {
+        if (sUseCliSeiForStrings) {
+            cli();
+        }
+        write1Start8Data1StopNoParityWithCliSei(tChar);
+        if (sUseCliSeiForStrings) {
+            sei();
+        }
+        tChar = pgm_read_byte_near((const uint8_t * ) ++aStringPtr);
+    }
+}
+
+void writeString_E(const char * aStringPtr) {
+    uint8_t tChar = eeprom_read_byte((const uint8_t *) aStringPtr);
+    // Comparing with 0xFF is safety net for wrong string pointer
+    while (tChar != 0 && tChar != 0xFF) {
+        if (sUseCliSeiForStrings) {
+            cli();
+        }
+        write1Start8Data1StopNoParityWithCliSei(tChar);
+        if (sUseCliSeiForStrings) {
+            sei();
+        }
+        tChar = eeprom_read_byte((const uint8_t *) ++aStringPtr);
     }
 }
 
