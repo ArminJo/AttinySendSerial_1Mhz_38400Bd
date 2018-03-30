@@ -42,6 +42,8 @@ inline void write1Start8Data1StopNoParityWithCliSei(uint8_t aChar) {
 }
 
 void writeString(const char * aStringPtr);
+void writeString_P(const char * aStringPtr);
+void writeString_E(const char * aStringPtr);
 void writeStringWithCliSei(const char * aStringPtr);
 void writeStringWithoutCliSei(const char * aStringPtr);
 void writeStringSkipLeadingSpaces(const char * aStringPtr);
